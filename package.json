@@ -1,10 +1,9 @@
 {
-  "name": "adapt-authoring-moduleloader",
+  "name": "adapt-authoring-server",
   "version": "0.0.1",
-  "description": "Module loader for the Adapt authoring tool",
+  "description": "Express server for the Adapt authoring tool",
   "main": "index.js",
   "dependencies": {
-    "adapt-authoring-server": "*",
-    "adapt-authoring-ui": "*"
+    "express": "4.16.3"
   }
 }

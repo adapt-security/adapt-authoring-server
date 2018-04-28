@@ -1,11 +1,5 @@
-const modules = require('./package.json').dependencies;
-
-function loadModules() {
-  return new Promise(function(resolve, reject) {
-    console.log(modules);
-  });
-}
+const server = require('./lib/server');
 
 module.exports = {
-  loadModules
+  Server: server
 };
