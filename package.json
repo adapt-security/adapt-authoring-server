@@ -4,6 +4,7 @@
   "description": "Express server for the Adapt authoring tool",
   "main": "index.js",
   "dependencies": {
+    "adapt-authoring-core": "git+https://github.com/taylortom/adapt-authoring-core.git",
     "express": "4.16.3"
   }
 }
