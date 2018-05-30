@@ -5,7 +5,10 @@
   "main": "index.js",
   "adapt_authoring": {
     "module": true,
-    "includeDocumentation": true
+    "documentation": {
+      "enable": true,
+      "include": "lib/*"
+    }
   },
   "dependencies": {
     "adapt-authoring-core": "git+https://github.com/taylortom/adapt-authoring-core.git",
