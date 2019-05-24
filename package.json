@@ -2,6 +2,7 @@
   "name": "adapt-authoring-server",
   "version": "0.0.1",
   "description": "Express server for the Adapt authoring tool",
+  "homepage": "https://github.com/taylortom/adapt-authoring-server",
   "main": "index.js",
   "adapt_authoring": {
     "module": true,
