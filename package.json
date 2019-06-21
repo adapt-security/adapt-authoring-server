@@ -1,7 +1,7 @@
 {
   "name": "adapt-authoring-server",
   "version": "0.0.1",
-  "description": "Express server for the Adapt authoring tool",
+  "description": "Provides an Express application routing and more",
   "homepage": "https://github.com/taylortom/adapt-authoring-server",
   "main": "index.js",
   "adapt_authoring": {
