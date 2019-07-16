@@ -1,0 +1,7 @@
+{
+  "routeralreadyinited": "Router has already initialised",
+  "middlewaremaynotbecalled": "middleware may not be called before any route handlers",
+  "nomoreroutes": "cannot set further routes",
+  "nomorechildrouters": "cannot create further child routers",
+  "notfound": "Not found: %{method} %{url}",
+}
