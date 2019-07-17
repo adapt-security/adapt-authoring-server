@@ -2,14 +2,17 @@ module.exports = {
   definition: {
     host: {
       type: 'String',
-      required: true
+      required: true,
+      description: 'Name of the server host'
     },
     port: {
       type: 'Number',
-      required: true
+      required: true,
+      description: 'Port to listen for incoming connections'
     },
     url: {
-      type: 'String'
+      type: 'String',
+      description: 'URL the server can be accessed from'
     }
   }
 };
