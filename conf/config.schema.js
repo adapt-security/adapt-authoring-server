@@ -3,12 +3,12 @@ module.exports = {
     host: {
       type: 'String',
       required: true,
-      description: 'Name of the server host'
+      description: 'Name of the host machine the server is running from'
     },
     port: {
       type: 'Number',
       required: true,
-      description: 'Port to listen for incoming connections'
+      description: 'Port to be used for listening to incoming connections'
     },
     url: {
       type: 'String',
