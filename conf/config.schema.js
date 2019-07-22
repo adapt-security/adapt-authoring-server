@@ -13,6 +13,11 @@ module.exports = {
     url: {
       type: 'String',
       description: 'URL the server can be accessed from'
+    },
+    logStackOnError: {
+      type: 'Boolean',
+      default: false,
+      description: 'Will log a stack trace when an error occurs'
     }
   }
 };
