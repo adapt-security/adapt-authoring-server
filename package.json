@@ -11,6 +11,9 @@
       "includes": {
         "source": "lib/*"
       }
+    },
+    "testing": {
+      "tests": "tests/*.spec.js"
     }
   },
   "dependencies": {
