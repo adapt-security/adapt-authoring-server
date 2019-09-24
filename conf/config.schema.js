@@ -12,6 +12,7 @@ module.exports = {
     },
     url: {
       type: 'String',
+      required: true,
       description: 'URL the server can be accessed from'
     },
     logStackOnError: {
