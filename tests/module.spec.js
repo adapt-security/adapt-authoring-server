@@ -1,4 +1,4 @@
-const assert = require('assert');
+const should = require('should');
 
 describe('Server module', function() {
   before(function() {
@@ -6,7 +6,7 @@ describe('Server module', function() {
   });
   describe('#functionName()', function() {
     it('should check something', function() {
-      assert(false);
+      false.should.be.true();
     });
   });
   after(function() {
