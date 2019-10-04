@@ -3,7 +3,7 @@ const should = require('should');
 
 describe('Server router', function() {
   before(function() {
-    this.router = new Router('test', { path: 'home' });
+    this.router = new Router('test', { path: 'home', use: () => {} });
   });
   describe('#path()', function() {
     it('should generate the endpoint of the router', function() {
@@ -30,90 +30,59 @@ describe('Server router', function() {
       this.router.addMiddleware(m1, m2);
       this.router.middleware.should.containEql(m2);
     });
-    it('should not add middleware once initialised', function() {
-      (false).should.be.true;;
+    it('should return router reference so as to be chainable', function() {
+      const r = this.router.addMiddleware(m2);
+      r.should.equal(this.router);
     });
-    // errors after initalise
-    // chainable
   });
   describe('#addRoute()', function() {
-    // route added to stack
-    // accepts multiple params
-    // errors after initalise
-    // chainable
+    const r1 = { route: 'test1', handlers: { get: () => {} } };
+    const r2 = { route: 'test2', handlers: { get: () => {} } };
+    const r3 = { route: 'test3', handlers: { get: () => {} } };
+    it('should add a route function to the stack', function() {
+      this.router.addRoute(r1);
+      this.router.routes.should.containEql(r1);
+    });
+    it('should add multiple routes to the stack', function() {
+      this.router.addRoute(r1, r2);
+      this.router.routes.should.containEql(r2);
+    });
+    it('should return router reference so as to be chainable', function() {
+      const r = this.router.addRoute(r2);
+      r.should.equal(this.router);
+    });
   });
   describe('#createChildRouter()', function() {
-    // returns a router instance
-    // has specified route
-    // added to child routers
-    // this is parent
+    let r;
+    before(function() {
+      r = this.router.createChildRouter('child');
+    });
+    it('should return a router instance', function() {
+      r.should.be.instanceof(Router);
+    });
+    it('should expose specified route', function() {
+      r.route.should.equal('child');
+    });
+    it('should be added to child routers', function() {
+      this.router.childRouters.should.containEql(r);
+    });
+    it('should reference current router as parent', function() {
+      r.parentRouter.should.equal(this.router);
+    });
   });
-  describe('#init()', function() {
-    // ???
+  describe('#handleRequest()', function() {
+    it('should check something', function() {
+      true.should.be.false();
+    });
   });
-  after(function() {
-    // any clean-up should go here
+  describe('#genericNotFoundHandler()', function() {
+    it('should check something', function() {
+      true.should.be.false();
+    });
+  });
+  describe('#genericErrorHandler()', function() {
+    it('should check something', function() {
+      true.should.be.false();
+    });
   });
 });
-
-  /**
-  * Initialises the API
-
-  init() {
-    if(this._initialised) {
-      return this.log('warn', App.instance.lang.t('error.routeralreadyinited'));
-    }
-    if(this.middleware.length) {
-      this._router.use(...this.middleware);
-    }
-    if(this.childRouters.length) {
-      this.childRouters.forEach(r => {
-        r.init();
-        this._router.use(r.route, r._router);
-      });
-    }
-    if(this.routes.length) {
-      this.routes.forEach(r => {
-        Object.entries(r.handlers).forEach(([method, handler]) => {
-          this.log('debug', App.instance.lang.t('info.addroute', { method: method.toUpperCase(), route: this.path+r.route }));
-          this._router[method](r.route, this.handleRequest(), handler);
-        });
-      });
-    }
-    // some generic error handling
-    this._router.all('*', this.genericNotFoundHandler.bind(this));
-    this._router.use(this.genericErrorHandler.bind(this));
-
-    if(this.parentRouter instanceof Router) {
-      this.parentRouter._router.use(`/${this.route}`, this._router);
-    } else {
-      const route = (this.route[0] !== '/') ? `/${this.route}` : this.route;
-      this.parentRouter.use(route, this._router);
-    }
-    this._initialised = true;
-  }
-  handleRequest() {
-    return (req, res, next) => {
-      App.instance.getModule('server').requestHook.invoke(req)
-        .then((d) => next())
-        .catch((e) => next(e));
-    };
-  }
-  /**
-  * Generic 404 handler for router
-  genericNotFoundHandler(req, res, next) {
-    new Responder(res).error(App.instance.lang.t('error.routenotfound', { method: req.method, url: req.originalUrl }), { statusCode: 404 });
-  }
-  /**
-  * Catch-all error handler for router
-  genericErrorHandler(error, req, res, next) {
-    const logStack = App.instance.config.get('adapt-authoring-server.logStackOnError');
-    this.log('error', logStack ? error.stack : error.toString());
-    new Responder(res).error(error, { statusCode: error.statusCode || 500 });
-  }
-  /**
-  * Logs a message
-  log(level, ...args) {
-    App.instance.logger.log(level, this.constructor.name.toLowerCase(), ...args);
-  }
-*/
