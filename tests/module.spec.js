@@ -1,7 +1,7 @@
 const assert = require('assert');
 
 describe('Server module', function() {
-  after(function() {
+  before(function() {
     // any set-up should go here
   });
   describe('#functionName()', function() {
