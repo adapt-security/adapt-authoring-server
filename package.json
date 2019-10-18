@@ -7,13 +7,7 @@
   "adapt_authoring": {
     "module": true,
     "documentation": {
-      "enable": true,
-      "includes": {
-        "source": "lib/*"
-      }
-    },
-    "testing": {
-      "tests": "tests/*.spec.js"
+      "enable": true
     }
   },
   "dependencies": {
