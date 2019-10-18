@@ -3,19 +3,18 @@ const should = require('should');
 
 describe('Server router', function() {
   before(function() {
-    this.router = new Router('test', { path: 'home', use: () => {} });
+    this.router = new Router('test', { path: '/home', use: () => {} });
   });
   describe('#path()', function() {
     it('should generate the endpoint of the router', function() {
-      this.router.path.should.equal('home/test');
+      this.router.path.should.equal('/home/test');
     });
   });
   describe('#map()', function() {
     it('should generate a map of endpoints exposed by the router', function() {
       const map = this.router.map;
       map.should.be.an.Object();
-      map.should.have.property('test');
-      map.test.should.equal(this.router.path);
+      map.should.have.property('test_url');
     });
   });
   describe('#addMiddleware()', function() {
