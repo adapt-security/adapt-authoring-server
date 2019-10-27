@@ -33,6 +33,9 @@ describe('Server router', function() {
       const r = this.router.addMiddleware(m2);
       r.should.equal(this.router);
     });
+    it('should call custom middleware on client request', function() {
+      false.should.be.true();
+    });
   });
   describe('#addRoute()', function() {
     const r1 = { route: 'test1', handlers: { get: () => {} } };
@@ -49,6 +52,9 @@ describe('Server router', function() {
     it('should return router reference so as to be chainable', function() {
       const r = this.router.addRoute(r2);
       r.should.equal(this.router);
+    });
+    it('should call route handler on client request', function() {
+      false.should.be.true();
     });
   });
   describe('#createChildRouter()', function() {
