@@ -30,11 +30,21 @@ describe('Server module', function() {
     });
   });
   describe('#boot()', function() {
-    it('should accept requests on the specified URL/port', function() {
-      false.should.be.true();
+    it('should accept requests on the specified URL/port', function(done) {
+      const fail = () => done(new Error(`Failed to connect to '${this.server.url}'`));
+      this.server.preload(this.server.app, () => {
+        this.server.boot(this.server.app, () => {
+          try {
+            const http = require(this.server.url.indexOf('https://') === 0 ? 'https' : 'http');
+            http.get(`${this.server.url}${this.server.api.path}`, res => {
+              res.statusCode.should.equal(200);
+              done();
+            }).on('error', fail);
+          } catch(e) {
+            fail();
+          }
+        }, done);
+      }, done);
     });
-  });
-  after(function() {
-    // any clean-up should go here
   });
 });
