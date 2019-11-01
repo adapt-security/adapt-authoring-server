@@ -7,5 +7,6 @@
   "invalidroute": "invalid route config for %{route} router",
   "routenotstring": "route must be a string",
   "nohandlers": "no route handlers defined",
-  "handlersnotfuncs": "all route handlers must be functions"
+  "handlersnotfuncs": "all route handlers must be functions",
+  "noserver": "Cannot stop server, it wasn't running!"
 }
