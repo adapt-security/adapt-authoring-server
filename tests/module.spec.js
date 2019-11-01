@@ -1,7 +1,8 @@
 const { Hook } = require('adapt-authoring-core');
-const should = require('should');
-const ServerModule = require('../lib/module');
 const Router = require('../lib/router');
+const ServerModule = require('../lib/module');
+const should = require('should');
+const supertest = require('supertest');
 
 describe('Server module', function() {
   before(function() {
@@ -31,20 +32,17 @@ describe('Server module', function() {
   });
   describe('#boot()', function() {
     it('should accept requests on the specified URL/port', function(done) {
-      const fail = () => done(new Error(`Failed to connect to '${this.server.url}'`));
       this.server.preload(this.server.app, () => {
         this.server.boot(this.server.app, () => {
-          try {
-            const http = require(this.server.url.indexOf('https://') === 0 ? 'https' : 'http');
-            http.get(`${this.server.url}${this.server.api.path}`, res => {
-              res.statusCode.should.equal(200);
-              done();
-            }).on('error', fail);
-          } catch(e) {
-            fail();
-          }
+          supertest(this.server.expressApp)
+            .get(`${this.server.api.path}`)
+            .expect(200)
+            .end(done);
         }, done);
       }, done);
     });
+  });
+  after(function(done) {
+    this.server.close(done);
   });
 });

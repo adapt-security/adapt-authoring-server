@@ -1,21 +1,19 @@
 const { App } = require('adapt-authoring-core');
 const express = require('express');
-const http = require('http');
 const Router = require('../lib/router');
 const ServerModule = require('../lib/module');
 const should = require('should');
+const supertest = require('supertest');
 
 describe('Server router', function() {
   before(function() {
     this.createRouter = (r = 'test') => new Router(r, express());
     this.testRequest = (router, done, expectedStatus = 200) => {
-      router.parentRouter.listen(undefined, function() {
-        try {
-          http.get(`http://localhost:${this.address().port}${router.path}`, res => {
-            res.statusCode.should.equal(expectedStatus);
-            done();
-          }).on('error', done);
-        } catch(e) { done(e); }
+      const l = router.parentRouter.listen(undefined, function() {
+        supertest(router.parentRouter)
+          .get(`${router.path}`)
+          .expect(expectedStatus)
+          .end((e, res) => l.close(done))
       });
     };
   });
