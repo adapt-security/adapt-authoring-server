@@ -16,8 +16,5 @@
   },
   "peerDependencies": {
     "adapt-authoring-core": "github:adapt-security/adapt-authoring-core.git"
-  },
-  "devDependencies": {
-    "supertest": "4.0.2"
   }
 }
