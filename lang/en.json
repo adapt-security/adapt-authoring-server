@@ -1,0 +1,18 @@
+{
+  "error.routeralreadyinited": "Router has already initialised",
+  "error.middlewaremaynotbecalled": "middleware may not be called before any route handlers",
+  "error.nomoreroutes": "cannot set further routes",
+  "error.nomorechildrouters": "cannot create further child routers",
+  "error.routenotfound": "Not found: %{method} %{url}",
+  "error.invalidroute": "invalid route config for %{route} router",
+  "error.routenotstring": "route must be a string",
+  "error.nohandlers": "no route handlers defined",
+  "error.handlersnotfuncs": "all route handlers must be functions",
+  "error.noserver": "Cannot stop server, it wasn't running!",
+  "error.unknownlang": "Language '%{lang}' not supported",
+  "info.applistening": "listening on %{port}",
+  "info.appstoplistening": "no longer listening on %{port}",
+  "info.appavailable": "app available at %{url}",
+  "info.addrouter": "added router at %{path}",
+  "info.addroute": "added %{method} %{route}"
+}
