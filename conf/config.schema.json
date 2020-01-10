@@ -4,23 +4,21 @@
   "properties": {
     "host": {
       "type": "string",
-      "description": "Name of the host machine the server is running from",
-      "required": true
+      "description": "Name of the host machine the server is running from"
     },
     "port": {
       "type": "number",
-      "description": "Port to be used for listening to incoming connections",
-      "required": true
+      "description": "Port to be used for listening to incoming connections"
     },
     "url": {
       "type": "string",
-      "description": "URL the server can be accessed from",
-      "required": true
+      "description": "URL the server can be accessed from"
     },
     "logStackOnError": {
       "type": "boolean",
       "description": "Will log a stack trace when an error occurs",
       "default": false
     }
-  }
+  },
+  "required": ["host", "port", "url"]
 }
