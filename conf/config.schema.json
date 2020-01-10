@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "host": {
+      "type": "string",
+      "description": "Name of the host machine the server is running from",
+      "required": true
+    },
+    "port": {
+      "type": "number",
+      "description": "Port to be used for listening to incoming connections",
+      "required": true
+    },
+    "url": {
+      "type": "string",
+      "description": "URL the server can be accessed from",
+      "required": true
+    },
+    "logStackOnError": {
+      "type": "boolean",
+      "description": "Will log a stack trace when an error occurs",
+      "default": false
+    }
+  }
+}
