@@ -5,6 +5,7 @@
   "error.nomorechildrouters": "cannot create further child routers",
   "error.routenotfound": "Not found: %{method} %{url}",
   "error.invalidroute": "invalid route config for %{route} router",
+  "error.invalidexpressfunction": "'%{func}' must be a valid Express.js function",
   "error.routenotstring": "route must be a string",
   "error.nohandlers": "no route handlers defined",
   "error.handlersnotfuncs": "all route handlers must be functions",
