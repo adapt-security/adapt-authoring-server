@@ -11,6 +11,7 @@
   "error.handlersnotfuncs": "all route handlers must be functions",
   "error.noserver": "Cannot stop server, it wasn't running!",
   "error.unknownlang": "Language '%{lang}' not supported",
+  "info.startingserver": "app intitalised successfully, starting server",
   "info.applistening": "listening on %{port}",
   "info.appstoplistening": "no longer listening on %{port}",
   "info.appavailable": "app available at %{url}",
