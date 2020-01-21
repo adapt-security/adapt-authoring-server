@@ -9,6 +9,7 @@
   "error.routenotstring": "route must be a string",
   "error.nohandlers": "no route handlers defined",
   "error.handlersnotfuncs": "all route handlers must be functions",
+  "error.noenablemap": "cannot enable api map",
   "error.noserver": "Cannot stop server, it wasn't running!",
   "error.unknownlang": "Language '%{lang}' not supported",
   "info.startingserver": "app intitalised successfully, starting server",
