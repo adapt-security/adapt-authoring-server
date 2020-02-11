@@ -1,7 +1,6 @@
 const { App } = require('adapt-authoring-core');
 const express = require('express');
 const Router = require('../lib/router');
-const ServerModule = require('../lib/module');
 const should = require('should');
 const supertest = require('supertest');
 
@@ -98,13 +97,6 @@ describe('Server router', function() {
     it('should generate the endpoint of the router', function() {
       const child = new Router('child', new Router('parent', {}));
       child.path.should.equal('/parent/child');
-    });
-  });
-  describe('#map()', function() {
-    it('should generate a map of endpoints exposed by the router', function() {
-      const map = this.createRouter().map;
-      map.should.be.an.Object();
-      map.should.have.property('test_url');
     });
   });
   describe('#handleRequest()', function() {

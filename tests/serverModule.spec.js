@@ -1,6 +1,6 @@
 const { Hook } = require('adapt-authoring-core');
 const Router = require('../lib/router');
-const ServerModule = require('../lib/module');
+const ServerModule = require('../lib/serverModule');
 const should = require('should');
 const supertest = require('supertest');
 
@@ -9,6 +9,9 @@ describe('Server module', function() {
     this.server = new ServerModule(global.ADAPT.app, { name: require('../package.json').name });
   });
   describe('#constructor()', function() {
+    it('should expose the Express application', function() {
+      false.should.be.true();
+    });
     it('should expose a `root` Router', function() {
       this.server.root.should.be.an.instanceof(Router);
     });
@@ -18,31 +21,31 @@ describe('Server module', function() {
     it('should expose a hook to modify requests', function() {
       this.server.requestHook.should.be.an.instanceof(Hook);
     });
-    it('should expose Express.js App listen function', function() {
-      this.server.listen.should.be.a.Function();
-    });
-    it('should expose Express.js App static function', function() {
-      this.server.static.should.be.a.Function();
-    });
   });
   describe('#url()', function() {
     it('should return the URL of the server', function() {
       this.server.url.should.be.a.String();
     });
   });
-  describe('#boot()', function() {
-    it('should accept requests on the specified URL/port', function(done) {
-      this.server.preload(this.server.app, () => {
-        this.server.boot(this.server.app, () => {
-          supertest(this.server.expressApp)
-            .get(`${this.server.api.path}`)
-            .expect(200)
-            .end(done);
-        }, done);
-      }, done);
+  describe('#static()', function() {
+    it('should expose Express#static', function() {
+      false.should.be.true();
     });
   });
-  after(function(done) {
-    this.server.close(done);
+  describe('#listen()', function() {
+    it('should accept requests on the specified URL/port', function(done) {
+      supertest(this.server.expressApp)
+        .get(`${this.server.api.path}`)
+        .expect(200)
+        .end(done);
+    });
+    it('should not accept requests on unspecified URLs/ports', function(done) {
+      false.should.be.true();
+    });
+  });
+  describe('#close()', function() {
+    it('should stop accepting requests', function() {
+      false.should.be.true();
+    });
   });
 });
