@@ -4,6 +4,7 @@
   "error.nomoreroutes": "cannot set further routes",
   "error.nomorechildrouters": "cannot create further child routers",
   "error.routenotfound": "Not found: %{method} %{url}",
+  "error.invaliderrorformat": "unrecognised error format",
   "error.invalidroute": "invalid route config for %{route} router",
   "error.invalidexpressfunction": "'%{func}' must be a valid Express.js function",
   "error.invalidstatuscode": "status code must be a number",
