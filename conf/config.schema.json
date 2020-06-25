@@ -7,7 +7,7 @@
       "description": "Name of the host machine the server is running from"
     },
     "port": {
-      "type": "number",
+      "type": ["number", "string"],
       "description": "Port to be used for listening to incoming connections"
     },
     "url": {
