@@ -7,7 +7,7 @@
   "dependencies": {
     "express": "4.16.3",
     "hbs": "4.0.6",
-    "lodash": "4.17.15"
+    "lodash": "4.17.19"
   },
   "peerDependencies": {
     "adapt-authoring-core": "github:adapt-security/adapt-authoring-core.git"
