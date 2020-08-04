@@ -2,7 +2,9 @@
   "name": "adapt-authoring-server",
   "version": "0.0.1",
   "description": "Provides an Express application routing and more",
-  "homepage": "https://github.com/taylortom/adapt-authoring-server",
+  "homepage": "https://github.com/adaptlearning/adapt-authoring-server",
+  "license": "GPL-3.0",
+  "repository": "github:adaptlearning/adapt-authoring-server",
   "main": "index.js",
   "dependencies": {
     "express": "4.16.3",
