@@ -17,7 +17,7 @@
     "logStackOnError": {
       "type": "boolean",
       "description": "Will log a stack trace when an error occurs",
-      "default": false
+      "default": true
     }
   },
   "required": ["host", "port", "url"]
