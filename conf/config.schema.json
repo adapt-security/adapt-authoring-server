@@ -12,7 +12,10 @@
     },
     "url": {
       "type": "string",
-      "description": "URL the server can be accessed from"
+      "description": "URL the server can be accessed from",
+      "_adapt": {
+        "isPublic": true
+      }
     },
     "logStackOnError": {
       "type": "boolean",
