@@ -13,6 +13,7 @@
     "url": {
       "type": "string",
       "description": "URL the server can be accessed from",
+      "format": "uri",
       "_adapt": {
         "isPublic": true
       }
