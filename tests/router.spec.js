@@ -1,6 +1,6 @@
 const { App } = require('adapt-authoring-core');
 const express = require('express');
-const Router = require('../lib/router');
+const Router = require('../lib/Router');
 const should = require('should');
 const supertest = require('supertest');
 

@@ -1,6 +1,6 @@
 const { Hook } = require('adapt-authoring-core');
-const Router = require('../lib/router');
-const ServerModule = require('../lib/serverModule');
+const Router = require('../lib/Router');
+const ServerModule = require('../lib/ServerModule');
 const should = require('should');
 const supertest = require('supertest');
 
