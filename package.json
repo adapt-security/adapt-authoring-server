@@ -7,7 +7,7 @@
   "main": "index.js",
   "repository": "adaptlearning/adapt-authoring-server",
   "dependencies": {
-    "express": "4.16.3",
+    "express": "4.17.1",
     "hbs": "^4.1.1",
     "lodash": "^4.17.21"
   },
