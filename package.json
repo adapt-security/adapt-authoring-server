@@ -4,6 +4,7 @@
   "description": "Provides an Express application routing and more",
   "homepage": "https://github.com/adaptlearning/adapt-authoring-server",
   "license": "GPL-3.0",
+  "type": "module",
   "main": "index.js",
   "repository": "adaptlearning/adapt-authoring-server",
   "dependencies": {
