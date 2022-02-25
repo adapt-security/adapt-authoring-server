@@ -1,0 +1,9 @@
+{
+  "ENDPOINT_NOT_FOUND": {
+    "data": {
+      "endpoint": "The missing endpoint"
+    },
+    "description": "API endpoint does not exist",
+    "statusCode": 404
+  }
+}
