@@ -5,5 +5,12 @@
     },
     "description": "API endpoint does not exist",
     "statusCode": 404
+  },
+  "NO_NET_CONN": {
+    "data": {
+      "hostname": "The hostname we were trying to reach"
+    },
+    "description": "No network connection",
+    "statusCode": 400
   }
 }
