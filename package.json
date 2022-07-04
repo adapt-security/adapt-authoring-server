@@ -9,7 +9,7 @@
   "repository": "github:adapt-security/adapt-authoring-server",
   "dependencies": {
     "express": "4.16.3",
-    "hbs": "^4.1.1",
+    "hbs": "^4.2.0",
     "lodash": "^4.17.21"
   },
   "peerDependencies": {
