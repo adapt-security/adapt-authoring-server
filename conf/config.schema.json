@@ -18,6 +18,11 @@
         "isPublic": true
       }
     },
+    "debugRequestTime": {
+      "type": "boolean",
+      "description": "Will log the execution time of each request",
+      "default": false
+    },
     "logStackOnError": {
       "type": "boolean",
       "description": "Will log a stack trace when an error occurs",
