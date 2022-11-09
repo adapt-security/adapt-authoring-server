@@ -3,29 +3,29 @@
   "type": "object",
   "properties": {
     "host": {
-      "type": "string",
-      "description": "Name of the host machine the server is running from"
+      "description": "Name of the host machine the server is running from",
+      "type": "string"
     },
     "port": {
-      "type": ["number", "string"],
-      "description": "Port to be used for listening to incoming connections"
+      "description": "Port to be used for listening to incoming connections",
+      "type": ["number", "string"]
     },
     "url": {
-      "type": "string",
       "description": "URL the server can be accessed from",
+      "type": "string",
       "format": "uri",
       "_adapt": {
         "isPublic": true
       }
     },
     "debugRequestTime": {
-      "type": "boolean",
       "description": "Will log the execution time of each request",
+      "type": "boolean",
       "default": false
     },
     "logStackOnError": {
-      "type": "boolean",
       "description": "Will log a stack trace when an error occurs",
+      "type": "boolean",
       "default": false
     }
   },
