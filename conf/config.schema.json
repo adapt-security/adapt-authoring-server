@@ -18,6 +18,11 @@
         "isPublic": true
       }
     },
+    "trustProxy": {
+      "description": "Whether to trust the client's x-Forwarded-For header for the request IP address. Only enable if using your own trusted reverse proxy",
+      "type": "boolean",
+      "default": false
+    },
     "debugRequestTime": {
       "description": "Will log the execution time of each request",
       "type": "boolean",
