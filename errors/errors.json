@@ -13,5 +13,12 @@
     },
     "description": "No network connection",
     "statusCode": 400
+  },
+  "SERVER_START": {
+    "data": {
+      "error": "The error"
+    },
+    "description": "Failed to start server",
+    "statusCode": 500
   }
 }
