@@ -28,8 +28,8 @@
       "type": "boolean",
       "default": false
     },
-    "logStackOnError": {
-      "description": "Will log a stack trace when an error occurs",
+    "verboseErrorLogging": {
+      "description": "Whether to log errors in their entirety",
       "type": "boolean",
       "default": false
     }
