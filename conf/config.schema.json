@@ -23,11 +23,6 @@
       "type": ["number", "boolean"],
       "default": 0
     },
-    "debugRequestTime": {
-      "description": "Will log the execution time of each request",
-      "type": "boolean",
-      "default": false
-    },
     "verboseErrorLogging": {
       "description": "Whether to log errors in their entirety",
       "type": "boolean",
