@@ -2,7 +2,7 @@
   "documentation": {
     "enable": true,
     "manualPages": {
-      "server-requests.md": "advanced"      
+      "server-requests.md": "concepts"
     }
   }
 }
