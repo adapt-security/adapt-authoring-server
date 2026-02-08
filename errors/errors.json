@@ -7,6 +7,15 @@
     "description": "API endpoint does not exist",
     "statusCode": 404
   },
+  "METHOD_NOT_ALLOWED": {
+    "data": {
+      "endpoint": "The endpoint",
+      "method": "The HTTP method",
+      "allowedMethods": "The allowed HTTP methods"
+    },
+    "description": "HTTP method not allowed for this endpoint",
+    "statusCode": 405
+  },
   "NO_NET_CONN": {
     "data": {
       "hostname": "The hostname we were trying to reach"
