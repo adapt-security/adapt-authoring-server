@@ -71,6 +71,8 @@ describe('Router', () => {
       const parentRouter = new Router('/api/', mockApp)
       const childRouter = new Router('/users', parentRouter)
 
+      // Note: Current implementation allows double slashes
+      // This documents existing behavior, not ideal behavior
       assert.equal(childRouter.path, '/api//users')
     })
   })
