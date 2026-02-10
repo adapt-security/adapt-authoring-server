@@ -15,6 +15,9 @@
   "peerDependencies": {
     "adapt-authoring-core": "github:adapt-security/adapt-authoring-core"
   },
+  "scripts": {
+    "test": "node --test tests/**/*.spec.js"
+  },
   "devDependencies": {
     "@semantic-release/git": "^10.0.1",
     "conventional-changelog-eslint": "^6.0.0",
