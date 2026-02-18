@@ -8,17 +8,10 @@
   "main": "index.js",
   "repository": "github:adapt-security/adapt-authoring-server",
   "dependencies": {
+    "adapt-authoring-core": "^1.7.0",
     "express": "^5.1.0",
     "hbs": "^4.2.0",
     "lodash": "^4.17.21"
-  },
-  "peerDependencies": {
-    "adapt-authoring-core": "^1.7.0"
-  },
-  "peerDependenciesMeta": {
-    "adapt-authoring-core": {
-      "optional": true
-    }
   },
   "scripts": {
     "test": "node --test tests/**/*.spec.js"
