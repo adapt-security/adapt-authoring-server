@@ -1,24 +1,3 @@
-# Dependencies
 node_modules/
-
-# Build artifacts
-dist/
-build/
-*.log
-
-# OS files
 .DS_Store
 Thumbs.db
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Testing
-coverage/
-
-# Environment
-.env
-.env.local
