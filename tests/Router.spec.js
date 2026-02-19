@@ -2,7 +2,6 @@ import { describe, it, before } from 'node:test'
 import assert from 'node:assert/strict'
 import express from 'express'
 import { App } from 'adapt-authoring-core'
-import { log } from 'node:console'
 
 describe('Router', () => {
   let Router
