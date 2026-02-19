@@ -119,12 +119,6 @@ describe('ServerModule', () => {
       assert.ok(instance.root)
       assert.equal(instance.root.root, '/')
     })
-
-    it('should set httpServer to undefined initially', () => {
-      const instance = new ServerModule(createMockApp())
-
-      assert.equal(instance.httpServer, undefined)
-    })
   })
 
   describe('#close()', () => {

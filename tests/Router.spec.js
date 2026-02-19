@@ -2,6 +2,7 @@ import { describe, it, before } from 'node:test'
 import assert from 'node:assert/strict'
 import express from 'express'
 import { App } from 'adapt-authoring-core'
+import { log } from 'node:console'
 
 describe('Router', () => {
   let Router
@@ -133,13 +134,16 @@ describe('Router', () => {
 
   describe('#map', () => {
     it('should return a router map object', () => {
-      const router = new Router('api', mockApp, [
-        { route: '/test', handlers: { get: () => {} } }
+      const api = new Router('api', mockApp)
+      api.createChildRouter('test', [
+        { route: '/test', handlers: { get: () => {} }, post: () => {} },
+        { route: '/test2', handlers: { patch: () => {} } }
       ])
 
-      const map = router.map
+      const map = api.map
 
       assert.equal(typeof map, 'object')
+      assert.equal(map.test_endpoints.length, 2)
     })
 
     it('should return empty object for router with no routes', () => {
