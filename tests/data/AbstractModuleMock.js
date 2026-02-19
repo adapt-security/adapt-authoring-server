@@ -4,7 +4,7 @@
 class AbstractModuleMock {
   constructor () {
     this.app = {
-      onReady: () => Promise.resolve(),
+      onReady: () => new Promise(() => {}),
       errors: {}
     }
   }
