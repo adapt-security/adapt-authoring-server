@@ -130,6 +130,16 @@ describe('Router', () => {
 
       assert.equal(child.url, 'http://localhost:5000/api/users')
     })
+
+    it('should return empty string when server instance is not available', () => {
+      const origInstances = App.instance.dependencyloader.instances
+      App.instance.dependencyloader.instances = {}
+      const router = new Router('/api', mockApp)
+
+      assert.equal(router.url, '')
+
+      App.instance.dependencyloader.instances = origInstances
+    })
   })
 
   describe('#map', () => {
@@ -362,6 +372,13 @@ describe('Router', () => {
       assert.equal(router.validateRoute(route), true)
     })
 
+    it('should return false if handler array contains non-functions', () => {
+      const router = new Router('/test', mockApp)
+      const route = { route: '/users', handlers: { get: [() => {}, 'not a function'] } }
+
+      assert.equal(router.validateRoute(route), false)
+    })
+
     it('should accept multiple HTTP methods', () => {
       const router = new Router('/test', mockApp)
       const route = { route: '/users', handlers: { get: () => {}, post: () => {}, put: () => {}, delete: () => {} } }
@@ -393,6 +410,22 @@ describe('Router', () => {
       const child = router.createChildRouter('users', routes)
 
       assert.equal(child.routes.length, 1)
+    })
+
+    it('should pass middleware to child router', () => {
+      const router = new Router('/api', mockApp)
+      const mw = () => {}
+      const child = router.createChildRouter('users', [], [mw])
+
+      assert.ok(child.routerMiddleware.includes(mw))
+    })
+
+    it('should pass handler middleware to child router', () => {
+      const router = new Router('/api', mockApp)
+      const mw = () => {}
+      const child = router.createChildRouter('users', [], [], [mw])
+
+      assert.ok(child.handlerMiddleware.includes(mw))
     })
 
     it('should not create child after initialisation', () => {
