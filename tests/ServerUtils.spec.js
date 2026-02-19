@@ -177,6 +177,78 @@ describe('ServerUtils', () => {
       assert.equal(statusCode, 500)
       assert.equal(jsonData.code, 'SERVER_ERROR')
     })
+
+    it('sendError should look up known error codes on non-AdaptError', () => {
+      App.instance.errors = App.instance.errors || {}
+      App.instance.errors.CUSTOM_CODE = {
+        statusCode: 422,
+        code: 'CUSTOM_CODE',
+        message: 'Custom error'
+      }
+
+      const req = { translate: (error) => error.message }
+      const res = {}
+      const next = () => {}
+
+      ServerUtils.addErrorHandler(req, res, next)
+
+      let statusCode
+      let jsonData
+      res.status = (code) => { statusCode = code; return res }
+      res.json = (data) => { jsonData = data }
+
+      const error = new Error('details')
+      error.code = 'CUSTOM_CODE'
+      res.sendError(error)
+
+      assert.equal(statusCode, 422)
+      assert.equal(jsonData.code, 'CUSTOM_CODE')
+    })
+
+    it('sendError should include data field in response', () => {
+      const req = { translate: (error) => error.message }
+      const res = {}
+      const next = () => {}
+
+      ServerUtils.addErrorHandler(req, res, next)
+
+      let jsonData
+      res.status = () => res
+      res.json = (data) => { jsonData = data }
+
+      const adaptError = {
+        constructor: { name: 'AdaptError' },
+        statusCode: 400,
+        code: 'BAD_REQUEST',
+        message: 'Bad request',
+        data: { field: 'email' }
+      }
+      res.sendError(adaptError)
+
+      assert.deepEqual(jsonData.data, { field: 'email' })
+    })
+
+    it('sendError should use error.message when req.translate is not available', () => {
+      const req = {}
+      const res = {}
+      const next = () => {}
+
+      ServerUtils.addErrorHandler(req, res, next)
+
+      let jsonData
+      res.status = () => res
+      res.json = (data) => { jsonData = data }
+
+      const adaptError = {
+        constructor: { name: 'AdaptError' },
+        statusCode: 500,
+        code: 'ERR',
+        message: 'fallback message'
+      }
+      res.sendError(adaptError)
+
+      assert.equal(jsonData.message, 'fallback message')
+    })
   })
 
   describe('#mapHandler()', () => {
@@ -322,6 +394,30 @@ describe('ServerUtils', () => {
       assert.equal(nextCalled, true)
       assert.equal(nextError, undefined)
     })
+
+    it('should call next with METHOD_NOT_ALLOWED when path exists but method does not match', () => {
+      const mockError = { code: 'METHOD_NOT_ALLOWED' }
+      App.instance.errors = App.instance.errors || {}
+      App.instance.errors.METHOD_NOT_ALLOWED = { setData: () => mockError }
+
+      const mockRouter = {
+        path: '/api',
+        routes: [
+          { route: '/users', handlers: { get: () => {}, post: () => {} } }
+        ],
+        flattenRouters: () => [mockRouter]
+      }
+      const handler = ServerUtils.methodNotAllowedHandler(mockRouter)
+      let nextError = null
+
+      handler(
+        { method: 'DELETE', path: '/api/users', originalUrl: '/api/users' },
+        {},
+        (err) => { nextError = err }
+      )
+
+      assert.equal(nextError.code, 'METHOD_NOT_ALLOWED')
+    })
   })
 
   describe('#generateRouterMap()', () => {
@@ -388,6 +484,36 @@ describe('ServerUtils', () => {
       assert.ok('post' in endpoints[0].accepted_methods)
       assert.deepEqual(endpoints[0].accepted_methods.get, { description: 'list users' })
       assert.deepEqual(endpoints[0].accepted_methods.post, {})
+    })
+
+    it('should use relative route keys for child routers', () => {
+      const childRouter = {
+        root: 'users',
+        path: '/api/users',
+        url: 'http://localhost:5000/api/users',
+        routes: [
+          { route: '/:id', handlers: { get: () => {} } }
+        ],
+        childRouters: [],
+        parentRouter: null
+      }
+      const mockRouter = {
+        root: 'api',
+        route: '/api',
+        path: '/api',
+        url: 'http://localhost:5000/api',
+        routes: [],
+        childRouters: [childRouter],
+        flattenRouters: function () {
+          return [this, childRouter]
+        }
+      }
+      childRouter.parentRouter = mockRouter
+
+      const map = ServerUtils.generateRouterMap(mockRouter)
+      const keys = Object.keys(map)
+
+      assert.ok(keys.some(k => k.includes('users')))
     })
   })
 
