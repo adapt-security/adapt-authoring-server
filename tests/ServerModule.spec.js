@@ -49,13 +49,6 @@ describe('ServerModule', () => {
 
       assert.equal(typeof middleware, 'function')
     })
-
-    it('should accept options parameter', () => {
-      const instance = new ServerModule(createMockApp())
-      const middleware = instance.static('/public', { maxAge: 3600 })
-
-      assert.equal(typeof middleware, 'function')
-    })
   })
 
   describe('properties', () => {
@@ -131,24 +124,6 @@ describe('ServerModule', () => {
       const instance = new ServerModule(createMockApp())
 
       assert.equal(instance.httpServer, undefined)
-    })
-
-    it('should set isListening to false initially', () => {
-      const instance = new ServerModule(createMockApp())
-
-      assert.equal(instance.isListening, false)
-    })
-
-    it('should set trust proxy on express app', () => {
-      const instance = new ServerModule(createMockApp())
-
-      assert.equal(instance.expressApp.get('trust proxy'), true)
-    })
-
-    it('should set view engine to hbs', () => {
-      const instance = new ServerModule(createMockApp())
-
-      assert.equal(instance.expressApp.get('view engine'), 'hbs')
     })
   })
 

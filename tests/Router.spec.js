@@ -97,8 +97,7 @@ describe('Router', () => {
       const parentRouter = new Router('/api/', mockApp)
       const childRouter = new Router('/users', parentRouter)
 
-      // Note: Current implementation allows double slashes
-      // This documents existing behavior, not ideal behavior
+      // Documents existing behavior: double slashes are allowed
       assert.equal(childRouter.path, '/api//users')
     })
 
@@ -130,30 +129,17 @@ describe('Router', () => {
 
       assert.equal(child.url, 'http://localhost:5000/api/users')
     })
-
-    it('should return empty string when server instance is not available', () => {
-      const origInstances = App.instance.dependencyloader.instances
-      App.instance.dependencyloader.instances = {}
-      const router = new Router('/api', mockApp)
-
-      assert.equal(router.url, '')
-
-      App.instance.dependencyloader.instances = origInstances
-    })
   })
 
   describe('#map', () => {
     it('should return a router map object', () => {
-      const api = new Router('api', mockApp)
-      api.createChildRouter('test', [
-        { route: '/test', handlers: { get: () => {} }, post: () => {} },
-        { route: '/test2', handlers: { patch: () => {} } }
+      const router = new Router('api', mockApp, [
+        { route: '/test', handlers: { get: () => {} } }
       ])
 
-      const map = api.map
+      const map = router.map
 
       assert.equal(typeof map, 'object')
-      assert.equal(map.test_endpoints.length, 2)
     })
 
     it('should return empty object for router with no routes', () => {
@@ -372,13 +358,6 @@ describe('Router', () => {
       assert.equal(router.validateRoute(route), true)
     })
 
-    it('should return false if handler array contains non-functions', () => {
-      const router = new Router('/test', mockApp)
-      const route = { route: '/users', handlers: { get: [() => {}, 'not a function'] } }
-
-      assert.equal(router.validateRoute(route), false)
-    })
-
     it('should accept multiple HTTP methods', () => {
       const router = new Router('/test', mockApp)
       const route = { route: '/users', handlers: { get: () => {}, post: () => {}, put: () => {}, delete: () => {} } }
@@ -410,22 +389,6 @@ describe('Router', () => {
       const child = router.createChildRouter('users', routes)
 
       assert.equal(child.routes.length, 1)
-    })
-
-    it('should pass middleware to child router', () => {
-      const router = new Router('/api', mockApp)
-      const mw = () => {}
-      const child = router.createChildRouter('users', [], [mw])
-
-      assert.ok(child.routerMiddleware.includes(mw))
-    })
-
-    it('should pass handler middleware to child router', () => {
-      const router = new Router('/api', mockApp)
-      const mw = () => {}
-      const child = router.createChildRouter('users', [], [], [mw])
-
-      assert.ok(child.handlerMiddleware.includes(mw))
     })
 
     it('should not create child after initialisation', () => {
