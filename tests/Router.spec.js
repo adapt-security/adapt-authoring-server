@@ -98,7 +98,7 @@ describe('Router', () => {
       const childRouter = new Router('/users', parentRouter)
 
       // Documents existing behavior: double slashes are allowed
-      assert.equal(childRouter.path, '/api//users')
+      assert.equal(childRouter.path, '/api/users')
     })
 
     it('should handle root path without parent path property', () => {
