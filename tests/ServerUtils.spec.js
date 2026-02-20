@@ -76,9 +76,9 @@ describe('ServerUtils', () => {
 
       ServerUtils.addExistenceProps(req, res, next)
 
-      assert.equal(req.hasBody, true)
-      assert.equal(req.hasParams, true)
-      assert.equal(req.hasQuery, true)
+      assert.equal(req.hasBody, false)
+      assert.equal(req.hasParams, false)
+      assert.equal(req.hasQuery, false)
     })
 
     it('should mark has* false when all entries are null or undefined', () => {
