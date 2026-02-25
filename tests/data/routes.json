@@ -1,0 +1,22 @@
+{
+  "root": "content",
+  "schemaName": "content",
+  "collectionName": "content",
+  "useDefaultRoutes": true,
+  "routes": [
+    {
+      "route": "/insertrecursive",
+      "handlers": { "post": "insertRecursive" },
+      "permissions": { "post": ["write:content"] },
+      "meta": {
+        "post": {
+          "summary": "Insert hierarchical content data"
+        }
+      }
+    },
+    {
+      "route": "/list",
+      "handlers": { "get": "listItems" }
+    }
+  ]
+}
