@@ -1,6 +1,6 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert/strict'
-import { writeFile, unlink, mkdir, rm } from 'node:fs/promises'
+import { writeFile, mkdir, rm } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { loadRouteConfig } from '../lib/utils/loadRouteConfig.js'
@@ -8,6 +8,18 @@ import { loadRouteConfig } from '../lib/utils/loadRouteConfig.js'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const dataDir = path.join(__dirname, 'data')
 const tmpDir = path.join(__dirname, 'tmp')
+
+/**
+ * Writes a JSON file and returns its path.
+ * @param {String} filePath Absolute path to write the JSON file
+ * @param {Object} data Data to serialize as JSON
+ * @return {Promise<String>} The file path
+ * @ignore
+ */
+async function writeJson (filePath, data) {
+  await writeFile(filePath, JSON.stringify(data))
+  return filePath
+}
 
 describe('loadRouteConfig()', () => {
   before(async () => {
@@ -63,6 +75,30 @@ describe('loadRouteConfig()', () => {
     assert.ok(route.meta)
   })
 
+  it('should preserve consumer-specific top-level fields after validation', async () => {
+    const dir = path.join(tmpDir, 'consumer-fields')
+    await mkdir(dir, { recursive: true })
+    const schemaFile = await writeJson(path.join(tmpDir, 'withschema.schema.json'), {
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      $anchor: 'withschema',
+      $merge: {
+        source: { $ref: 'routes' },
+        with: {
+          properties: { schemaName: { type: 'string' } },
+          required: ['schemaName']
+        }
+      }
+    })
+    await writeJson(path.join(dir, 'routes.json'), {
+      root: 'content',
+      schemaName: 'content',
+      routes: []
+    })
+    const target = {}
+    const config = await loadRouteConfig(dir, target, { schema: 'withschema', schemaFile })
+    assert.equal(config.schemaName, 'content')
+  })
+
   it('should use handlerAliases when provided', async () => {
     const aliasHandler = () => 'alias'
     const target = {
@@ -88,70 +124,79 @@ describe('loadRouteConfig()', () => {
   it('should throw when routes.json fails schema validation (missing required root)', async () => {
     const dir = path.join(tmpDir, 'no-root')
     await mkdir(dir, { recursive: true })
-    await writeFile(path.join(dir, 'routes.json'), JSON.stringify({ routes: [] }))
+    await writeJson(path.join(dir, 'routes.json'), { routes: [] })
     await assert.rejects(
       () => loadRouteConfig(dir, {}),
-      /Invalid routes\.json.*missing required property 'root'/s
+      /Invalid routes\.json.*must have required property 'root'/s
     )
   })
 
   it('should throw when routes.json fails schema validation (wrong type for root)', async () => {
     const dir = path.join(tmpDir, 'wrong-root-type')
     await mkdir(dir, { recursive: true })
-    await writeFile(path.join(dir, 'routes.json'), JSON.stringify({ root: 42, routes: [] }))
+    await writeJson(path.join(dir, 'routes.json'), { root: 42, routes: [] })
     await assert.rejects(
       () => loadRouteConfig(dir, {}),
-      /Invalid routes\.json.*expected type 'string'/s
+      /Invalid routes\.json.*must be string/s
     )
   })
 
-  it('should throw when a route item has an invalid HTTP method in handlers', async () => {
-    const dir = path.join(tmpDir, 'bad-method')
-    await mkdir(dir, { recursive: true })
-    await writeFile(path.join(dir, 'routes.json'), JSON.stringify({
-      root: 'test',
-      routes: [{ route: '/test', handlers: { badmethod: 'myHandler' } }]
-    }))
-    await assert.rejects(
-      () => loadRouteConfig(dir, {}),
-      /Invalid routes\.json.*'badmethod' is not allowed/s
-    )
-  })
+  it('should validate route items via consumer schema using $merge', async () => {
+    // Consumer schema extends routes and adds items constraint
+    const schemaFile = await writeJson(path.join(tmpDir, 'strict-routes.schema.json'), {
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      $anchor: 'strict-routes',
+      $merge: {
+        source: { $ref: 'routes' },
+        with: {
+          properties: {
+            routes: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  route: { type: 'string' },
+                  handlers: { type: 'object' }
+                },
+                required: ['route', 'handlers']
+              }
+            }
+          }
+        }
+      }
+    })
 
-  it('should throw when a route item is missing required fields', async () => {
-    const dir = path.join(tmpDir, 'missing-route')
+    // Missing 'route' field in a route item
+    const dir = path.join(tmpDir, 'missing-route-field')
     await mkdir(dir, { recursive: true })
-    await writeFile(path.join(dir, 'routes.json'), JSON.stringify({
+    await writeJson(path.join(dir, 'routes.json'), {
       root: 'test',
       routes: [{ handlers: { get: 'myHandler' } }]
-    }))
+    })
     await assert.rejects(
-      () => loadRouteConfig(dir, {}),
-      /Invalid routes\.json.*missing required property 'route'/s
+      () => loadRouteConfig(dir, {}, { schema: 'strict-routes', schemaFile }),
+      /Invalid routes\.json.*must have required property 'route'/s
     )
   })
 
   it('should use a consumer-provided schema for top-level validation', async () => {
-    const schemaDir = path.join(tmpDir, 'consumer-schema')
-    await mkdir(schemaDir, { recursive: true })
-    // Consumer schema adds 'schemaName' as a required field
-    await writeFile(path.join(schemaDir, 'custom.schema.json'), JSON.stringify({
-      type: 'object',
-      properties: {
-        root: { type: 'string' },
-        schemaName: { type: 'string' },
-        routes: { type: 'array' }
-      },
-      required: ['root', 'schemaName']
-    }))
-    const routesDir = path.join(tmpDir, 'consumer-routes')
-    await mkdir(routesDir, { recursive: true })
-    // Missing schemaName → should throw
-    await writeFile(path.join(routesDir, 'routes.json'), JSON.stringify({ root: 'test', routes: [] }))
+    const schemaFile = await writeJson(path.join(tmpDir, 'custom.schema.json'), {
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      $anchor: 'custom',
+      $merge: {
+        source: { $ref: 'routes' },
+        with: {
+          properties: { schemaName: { type: 'string' } },
+          required: ['schemaName']
+        }
+      }
+    })
+    const dir = path.join(tmpDir, 'missing-schemaname')
+    await mkdir(dir, { recursive: true })
+    await writeJson(path.join(dir, 'routes.json'), { root: 'test', routes: [] })
     await assert.rejects(
-      () => loadRouteConfig(routesDir, {}, { schema: 'custom', schemaDir }),
-      /Invalid routes\.json.*missing required property 'schemaName'/s
+      () => loadRouteConfig(dir, {}, { schema: 'custom', schemaFile }),
+      /Invalid routes\.json.*must have required property 'schemaName'/s
     )
   })
 })
-

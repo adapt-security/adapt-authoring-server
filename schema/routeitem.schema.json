@@ -18,6 +18,17 @@
       "description": "Restrict route to localhost",
       "default": false
     },
+    "permissions": {
+      "type": "object",
+      "description": "Keys are HTTP methods, values are permission scope arrays or null for unsecured",
+      "propertyNames": { "enum": ["get", "post", "put", "patch", "delete"] },
+      "additionalProperties": {
+        "oneOf": [
+          { "type": "array", "items": { "type": "string" } },
+          { "type": "null" }
+        ]
+      }
+    },
     "meta": {
       "type": "object",
       "description": "Keys are HTTP methods, values are OpenAPI operation objects",
