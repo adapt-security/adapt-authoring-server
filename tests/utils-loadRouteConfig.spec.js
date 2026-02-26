@@ -300,4 +300,88 @@ describe('loadRouteConfig()', () => {
       )
     })
   })
+
+  describe('defaults option', () => {
+    it('should prepend default routes from template when defaults path is provided', async () => {
+      const dir = path.join(tmpDir, 'with-defaults')
+      await mkdir(dir, { recursive: true })
+      await writeJson(path.join(dir, 'routes.json'), {
+        root: 'test',
+        routes: [{ route: '/custom', handlers: { get: 'listItems' } }]
+      })
+      const defaultsPath = path.join(tmpDir, 'defaults.json')
+      await writeJson(defaultsPath, {
+        routes: [{ route: '/', handlers: { post: 'insertRecursive' } }]
+      })
+      const target = {
+        insertRecursive: () => {},
+        listItems: () => {}
+      }
+      const config = await loadRouteConfig(dir, target, { defaults: defaultsPath })
+      assert.equal(config.routes.length, 2)
+      assert.equal(config.routes[0].route, '/')
+      assert.equal(config.routes[1].route, '/custom')
+    })
+
+    it('should resolve handler strings in default routes using handlerAliases', async () => {
+      const dir = path.join(tmpDir, 'defaults-aliases')
+      await mkdir(dir, { recursive: true })
+      await writeJson(path.join(dir, 'routes.json'), { root: 'test', routes: [] })
+      const defaultsPath = path.join(tmpDir, 'defaults-aliases.json')
+      await writeJson(defaultsPath, {
+        routes: [{ route: '/', handlers: { post: 'myAlias' } }]
+      })
+      let called = false
+      const aliasHandler = () => { called = true }
+      const config = await loadRouteConfig(dir, {}, {
+        defaults: defaultsPath,
+        handlerAliases: { myAlias: aliasHandler }
+      })
+      assert.equal(typeof config.routes[0].handlers.post, 'function')
+      config.routes[0].handlers.post()
+      assert.ok(called)
+    })
+
+    it('should resolve handler strings in default routes against target methods', async () => {
+      const dir = path.join(tmpDir, 'defaults-target')
+      await mkdir(dir, { recursive: true })
+      await writeJson(path.join(dir, 'routes.json'), { root: 'test', routes: [] })
+      const defaultsPath = path.join(tmpDir, 'defaults-target.json')
+      await writeJson(defaultsPath, {
+        routes: [{ route: '/', handlers: { get: 'myMethod' } }]
+      })
+      let called = false
+      const target = { myMethod () { called = true } }
+      const config = await loadRouteConfig(dir, target, { defaults: defaultsPath })
+      config.routes[0].handlers.get()
+      assert.ok(called)
+    })
+
+    it('should not load defaults when routes.json does not exist', async () => {
+      const defaultsPath = path.join(tmpDir, 'unused-defaults.json')
+      await writeJson(defaultsPath, {
+        routes: [{ route: '/', handlers: { get: 'foo' } }]
+      })
+      const result = await loadRouteConfig(path.join(__dirname, 'nonexistent'), {}, { defaults: defaultsPath })
+      assert.equal(result, null)
+    })
+
+    it('should preserve non-handler fields on default route definitions', async () => {
+      const dir = path.join(tmpDir, 'defaults-fields')
+      await mkdir(dir, { recursive: true })
+      await writeJson(path.join(dir, 'routes.json'), { root: 'test', routes: [] })
+      const defaultsPath = path.join(tmpDir, 'defaults-fields.json')
+      await writeJson(defaultsPath, {
+        routes: [{
+          route: '/',
+          handlers: { post: 'myHandler' },
+          permissions: { post: null },
+          meta: { post: { summary: 'Test' } }
+        }]
+      })
+      const config = await loadRouteConfig(dir, { myHandler: () => {} }, { defaults: defaultsPath })
+      assert.equal(config.routes[0].permissions.post, null)
+      assert.equal(config.routes[0].meta.post.summary, 'Test')
+    })
+  })
 })
