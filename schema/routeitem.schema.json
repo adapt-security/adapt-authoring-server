@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$anchor": "routeitem",
+  "type": "object",
+  "properties": {
+    "route": {
+      "type": "string",
+      "description": "Express-style route path"
+    },
+    "handlers": {
+      "type": "object",
+      "description": "Keys are HTTP methods, values are handler name strings",
+      "propertyNames": { "enum": ["get", "post", "put", "patch", "delete"] },
+      "additionalProperties": { "type": "string" }
+    },
+    "internal": {
+      "type": "boolean",
+      "description": "Restrict route to localhost",
+      "default": false
+    },
+    "meta": {
+      "type": "object",
+      "description": "Keys are HTTP methods, values are OpenAPI operation objects",
+      "propertyNames": { "enum": ["get", "post", "put", "patch", "delete"] }
+    }
+  },
+  "required": ["route", "handlers"]
+}
