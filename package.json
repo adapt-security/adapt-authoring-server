@@ -12,13 +12,13 @@
   },
   "dependencies": {
     "adapt-authoring-core": "^2.0.0",
-    "adapt-schemas": "github:cgkineo/adapt-schemas#issue/12",
     "express": "^5.1.0",
     "hbs": "^4.2.0",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@semantic-release/git": "^10.0.1",
+    "adapt-schemas": "github:cgkineo/adapt-schemas#issue/12",
     "conventional-changelog-eslint": "^6.0.0",
     "semantic-release": "^25.0.2",
     "standard": "^17.1.0"

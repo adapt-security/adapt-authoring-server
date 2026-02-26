@@ -3,11 +3,17 @@ import assert from 'node:assert/strict'
 import { writeFile, mkdir, rm } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { Schemas } from 'adapt-schemas'
+import { App } from 'adapt-authoring-core'
 import { loadRouteConfig } from '../lib/utils/loadRouteConfig.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const SCHEMA_DIR = path.resolve(__dirname, '../schema')
 const dataDir = path.join(__dirname, 'data')
 const tmpDir = path.join(__dirname, 'tmp')
+
+/** Shared schema registry backing the jsonschema module mock */
+let schemas
 
 /**
  * Writes a JSON file and returns its path.
@@ -24,6 +30,27 @@ async function writeJson (filePath, data) {
 describe('loadRouteConfig()', () => {
   before(async () => {
     await mkdir(tmpDir, { recursive: true })
+
+    // Build shared schema registry with the server's base schemas, mirroring how
+    // adapt-authoring-jsonschema auto-discovers schema/ files from all dependencies at startup
+    schemas = new Schemas()
+    await schemas.init()
+    await schemas.registerSchema(path.join(SCHEMA_DIR, 'routes.schema.json'))
+    await schemas.registerSchema(path.join(SCHEMA_DIR, 'routeitem.schema.json'))
+
+    // Mock App.instance.waitForModule so loadRouteConfig can resolve 'jsonschema'
+    // without a running app instance
+    App.instance.waitForModule = async (modName) => {
+      if (modName === 'jsonschema') {
+        return { getSchema: (name) => schemas.getSchema(name) }
+      }
+      throw new Error(`Module '${modName}' not available in test environment`)
+    }
+
+    // App.init() runs in the background and fails in test context (no real modules),
+    // setting process.exitCode = 1. Wait for it to settle then reset exitCode.
+    await App.instance.onReady().catch(() => {})
+    process.exitCode = 0
   })
 
   after(async () => {
@@ -75,46 +102,16 @@ describe('loadRouteConfig()', () => {
     assert.ok(route.meta)
   })
 
-  it('should preserve consumer-specific top-level fields after validation', async () => {
-    const dir = path.join(tmpDir, 'consumer-fields')
-    await mkdir(dir, { recursive: true })
-    const schemaFile = await writeJson(path.join(tmpDir, 'withschema.schema.json'), {
-      $schema: 'https://json-schema.org/draft/2020-12/schema',
-      $anchor: 'withschema',
-      $merge: {
-        source: { $ref: 'routes' },
-        with: {
-          properties: { schemaName: { type: 'string' } },
-          required: ['schemaName']
-        }
-      }
-    })
-    await writeJson(path.join(dir, 'routes.json'), {
-      root: 'content',
-      schemaName: 'content',
-      routes: []
-    })
-    const target = {}
-    const config = await loadRouteConfig(dir, target, { schema: 'withschema', schemaFile })
-    assert.equal(config.schemaName, 'content')
-  })
-
   it('should use handlerAliases when provided', async () => {
     const aliasHandler = () => 'alias'
-    const target = {
-      listItems: () => {}
-    }
-    const aliases = { insertRecursive: aliasHandler }
-    const config = await loadRouteConfig(dataDir, target, { handlerAliases: aliases })
+    const target = { listItems: () => {} }
+    const config = await loadRouteConfig(dataDir, target, { handlerAliases: { insertRecursive: aliasHandler } })
 
     assert.equal(config.routes[0].handlers.post, aliasHandler)
   })
 
   it('should throw a clear error for unresolvable handler strings', async () => {
-    const target = {
-      listItems: () => {}
-      // intentionally missing insertRecursive
-    }
+    const target = { listItems: () => {} } // missing insertRecursive
     await assert.rejects(
       () => loadRouteConfig(dataDir, target),
       /Cannot resolve handler 'insertRecursive'/
@@ -141,8 +138,33 @@ describe('loadRouteConfig()', () => {
     )
   })
 
+  it('should preserve consumer-specific top-level fields after validation', async () => {
+    // Consumer schema mirrors how apiroutes/authroutes extend the base via $merge
+    const schemaFile = await writeJson(path.join(tmpDir, 'withschema.schema.json'), {
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      $anchor: 'withschema',
+      $merge: {
+        source: { $ref: 'routes' },
+        with: {
+          properties: { schemaName: { type: 'string' } },
+          required: ['schemaName']
+        }
+      }
+    })
+    await schemas.registerSchema(schemaFile)
+    try {
+      const dir = path.join(tmpDir, 'consumer-fields')
+      await mkdir(dir, { recursive: true })
+      await writeJson(path.join(dir, 'routes.json'), { root: 'content', schemaName: 'content', routes: [] })
+      const config = await loadRouteConfig(dir, {}, { schema: 'withschema' })
+      assert.equal(config.schemaName, 'content')
+    } finally {
+      schemas.deregisterSchema('withschema')
+    }
+  })
+
   it('should validate route items via consumer schema using $merge', async () => {
-    // Consumer schema extends routes and adds items constraint
+    // Consumer schema extends routes and adds items constraint — mirrors real apiroutes/authroutes
     const schemaFile = await writeJson(path.join(tmpDir, 'strict-routes.schema.json'), {
       $schema: 'https://json-schema.org/draft/2020-12/schema',
       $anchor: 'strict-routes',
@@ -165,18 +187,21 @@ describe('loadRouteConfig()', () => {
         }
       }
     })
-
-    // Missing 'route' field in a route item
-    const dir = path.join(tmpDir, 'missing-route-field')
-    await mkdir(dir, { recursive: true })
-    await writeJson(path.join(dir, 'routes.json'), {
-      root: 'test',
-      routes: [{ handlers: { get: 'myHandler' } }]
-    })
-    await assert.rejects(
-      () => loadRouteConfig(dir, {}, { schema: 'strict-routes', schemaFile }),
-      /Invalid routes\.json.*must have required property 'route'/s
-    )
+    await schemas.registerSchema(schemaFile)
+    try {
+      const dir = path.join(tmpDir, 'missing-route-field')
+      await mkdir(dir, { recursive: true })
+      await writeJson(path.join(dir, 'routes.json'), {
+        root: 'test',
+        routes: [{ handlers: { get: 'myHandler' } }]
+      })
+      await assert.rejects(
+        () => loadRouteConfig(dir, {}, { schema: 'strict-routes' }),
+        /Invalid routes\.json.*must have required property 'route'/s
+      )
+    } finally {
+      schemas.deregisterSchema('strict-routes')
+    }
   })
 
   it('should use a consumer-provided schema for top-level validation', async () => {
@@ -191,12 +216,83 @@ describe('loadRouteConfig()', () => {
         }
       }
     })
-    const dir = path.join(tmpDir, 'missing-schemaname')
-    await mkdir(dir, { recursive: true })
-    await writeJson(path.join(dir, 'routes.json'), { root: 'test', routes: [] })
-    await assert.rejects(
-      () => loadRouteConfig(dir, {}, { schema: 'custom', schemaFile }),
-      /Invalid routes\.json.*must have required property 'schemaName'/s
-    )
+    await schemas.registerSchema(schemaFile)
+    try {
+      const dir = path.join(tmpDir, 'missing-schemaname')
+      await mkdir(dir, { recursive: true })
+      await writeJson(path.join(dir, 'routes.json'), { root: 'test', routes: [] })
+      await assert.rejects(
+        () => loadRouteConfig(dir, {}, { schema: 'custom' }),
+        /Invalid routes\.json.*must have required property 'schemaName'/s
+      )
+    } finally {
+      schemas.deregisterSchema('custom')
+    }
+  })
+
+  describe('permissions field in route items', () => {
+    // Consumer schema with items validation including the permissions field from routeitem
+    const permSchema = {
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      $anchor: 'perm-routes',
+      $merge: {
+        source: { $ref: 'routes' },
+        with: {
+          properties: {
+            routes: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  route: { type: 'string' },
+                  handlers: { type: 'object' },
+                  permissions: {
+                    type: 'object',
+                    propertyNames: { enum: ['get', 'post', 'put', 'patch', 'delete'] },
+                    additionalProperties: {
+                      oneOf: [
+                        { type: 'array', items: { type: 'string' } },
+                        { type: 'null' }
+                      ]
+                    }
+                  }
+                },
+                required: ['route', 'handlers']
+              }
+            }
+          }
+        }
+      }
+    }
+
+    before(async () => {
+      await schemas.registerSchema(await writeJson(path.join(tmpDir, 'perm-routes.schema.json'), permSchema))
+    })
+
+    after(() => schemas.deregisterSchema('perm-routes'))
+
+    it('should accept null permission values (unsecured routes)', async () => {
+      const dir = path.join(tmpDir, 'perms-null')
+      await mkdir(dir, { recursive: true })
+      await writeJson(path.join(dir, 'routes.json'), {
+        root: 'test',
+        routes: [{ route: '/test', handlers: { post: 'myHandler' }, permissions: { post: null } }]
+      })
+      const config = await loadRouteConfig(dir, { myHandler: () => {} }, { schema: 'perm-routes' })
+      assert.equal(config.routes[0].permissions.post, null)
+    })
+
+    it('should reject invalid HTTP method keys in permissions', async () => {
+      const dir = path.join(tmpDir, 'perms-invalid-key')
+      await mkdir(dir, { recursive: true })
+      await writeJson(path.join(dir, 'routes.json'), {
+        root: 'test',
+        routes: [{ route: '/test', handlers: { post: 'myHandler' }, permissions: { invalidMethod: null } }]
+      })
+      await assert.rejects(
+        () => loadRouteConfig(dir, { myHandler: () => {} }, { schema: 'perm-routes' }),
+        /Invalid routes\.json.*property name must be valid/s
+      )
+    })
   })
 })
