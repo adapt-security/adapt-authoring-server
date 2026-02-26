@@ -1,0 +1,19 @@
+{
+  "root": "content",
+  "routes": [
+    {
+      "route": "/insertrecursive",
+      "handlers": { "post": "insertRecursive" },
+      "internal": false,
+      "meta": {
+        "post": {
+          "summary": "Insert hierarchical content data"
+        }
+      }
+    },
+    {
+      "route": "/list",
+      "handlers": { "get": "listItems" }
+    }
+  ]
+}
