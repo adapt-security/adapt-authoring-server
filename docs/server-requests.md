@@ -1,8 +1,69 @@
 # Handling server requests
-This page gives you some pointers on how to handle incoming requests in a way that will reduce the work needed by you as a developer, and create consistent and easy-to-process responses. 
+This page gives you some pointers on how to handle incoming requests in a way that will reduce the work needed by you as a developer, and create consistent and easy-to-process responses.
+
+## Defining routes with `routes.json`
+
+For modules that expose HTTP endpoints, the preferred approach is to declare routes in a `routes.json` file in the module root. This keeps route definitions, permissions, and API metadata in one place.
+
+```json
+{
+  "root": "mymodule",
+  "routes": [
+    {
+      "route": "/action",
+      "handlers": { "post": "actionHandler" },
+      "permissions": { "post": ["write:myresource"] },
+      "meta": {
+        "post": {
+          "summary": "Perform an action",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "responses": { "204": {} }
+        }
+      }
+    }
+  ]
+}
+```
+
+Then in your module code, use `loadRouteConfig` and `registerRoutes` to load and wire up the routes:
+
+```javascript
+import { loadRouteConfig, registerRoutes } from 'adapt-authoring-server'
+
+async init () {
+  const [auth, server] = await this.app.waitForModule('auth', 'server')
+  const config = await loadRouteConfig(this.rootDir, this)
+  const router = server.api.createChildRouter(config.root)
+  registerRoutes(router, config.routes, auth)
+}
+```
+
+### Route properties
+
+| Property | Required | Description |
+| -------- | -------- | ----------- |
+| `route` | Yes | Express-style route path (e.g. `"/reset/:id"`) |
+| `handlers` | Yes | Object mapping HTTP methods to handler method names on the module |
+| `permissions` | No | Object mapping HTTP methods to scope arrays (secured) or `null` (unsecured) |
+| `meta` | No | Object mapping HTTP methods to OpenAPI operation metadata |
+| `internal` | No | When `true`, restricts the route to localhost |
+| `override` | No | When `true` and defaults are in use, merges this route onto the matching default route instead of adding a duplicate |
+
+Handler strings are resolved to bound methods on the module instance automatically.
 
 ## Extend the `AbstractApiModule` class
-If you're building a non-trivial API (particularly one that uses the database), we highly recommend that you use `AbstractApiModule` as a base, as this includes a lot of boilerplate code and helper functions to make handling HTTP requests much easier. See [this page](writing-an-api) for more info on using the `AbstractApiModule` class. 
+If you're building a non-trivial API (particularly one that uses the database), we highly recommend that you use `AbstractApiModule` as a base, as this includes a lot of boilerplate code and helper functions to make handling HTTP requests much easier. See [this page](writing-an-api) for more info on using the `AbstractApiModule` class.
 
 ## Use HTTP status codes
 This may go without saying, but please stick to standardised HTTP response codes; they state your intentions and make it nice and easy for other devs to work with and react to.
@@ -18,12 +79,12 @@ Using the helper function is as simple as:
 async myHandler(req, res, next) {
   try {
     // do some stuff
-  } catch() {
+  } catch (e) {
     res.sendError(e);
   }
 }
 ```
 
 See the Express.js documentation for information on the extra functions available:
-- [Request](https://expressjs.com/en/4x/api.html#req)
-- [Response](https://expressjs.com/en/4x/api.html#res)
+- [Request](https://expressjs.com/en/5x/api.html#req)
+- [Response](https://expressjs.com/en/5x/api.html#res)
