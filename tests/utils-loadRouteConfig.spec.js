@@ -5,7 +5,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { Schemas } from 'adapt-schemas'
 import { App } from 'adapt-authoring-core'
-import { loadRouteConfig } from '../lib/utils/loadRouteConfig.js'
+import { loadRouteConfig } from '../lib/utils.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const SCHEMA_DIR = path.resolve(__dirname, '../schema')
