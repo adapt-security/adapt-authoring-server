@@ -383,5 +383,96 @@ describe('loadRouteConfig()', () => {
       assert.equal(config.routes[0].permissions.post, null)
       assert.equal(config.routes[0].meta.post.summary, 'Test')
     })
+
+    it('should merge override route properties onto matching default route', async () => {
+      const dir = path.join(tmpDir, 'override-merge')
+      await mkdir(dir, { recursive: true })
+      await writeJson(path.join(dir, 'routes.json'), {
+        root: 'test',
+        routes: [{
+          route: '/',
+          override: true,
+          handlers: { post: 'myHandler' },
+          meta: { post: { summary: 'Overridden' } }
+        }]
+      })
+      const defaultsPath = path.join(tmpDir, 'override-defaults.json')
+      await writeJson(defaultsPath, {
+        routes: [{ route: '/', handlers: { post: 'myHandler' }, permissions: { post: null } }]
+      })
+      const config = await loadRouteConfig(dir, { myHandler: () => {} }, { defaults: defaultsPath })
+      assert.equal(config.routes.length, 1)
+      assert.equal(config.routes[0].route, '/')
+      assert.equal(config.routes[0].meta.post.summary, 'Overridden')
+      assert.equal(config.routes[0].permissions.post, null)
+    })
+
+    it('should keep default handler when override does not replace it', async () => {
+      const dir = path.join(tmpDir, 'override-keep-handler')
+      await mkdir(dir, { recursive: true })
+      await writeJson(path.join(dir, 'routes.json'), {
+        root: 'test',
+        routes: [{
+          route: '/',
+          override: true,
+          handlers: { post: 'myHandler' },
+          meta: { post: { summary: 'Added meta' } }
+        }]
+      })
+      const defaultsPath = path.join(tmpDir, 'override-keep-handler-defaults.json')
+      await writeJson(defaultsPath, {
+        routes: [{ route: '/', handlers: { post: 'defaultHandler' } }]
+      })
+      const target = {
+        myHandler: () => {},
+        defaultHandler () {}
+      }
+      const config = await loadRouteConfig(dir, target, { defaults: defaultsPath })
+      // override handler takes precedence
+      assert.equal(typeof config.routes[0].handlers.post, 'function')
+      assert.equal(config.routes[0].meta.post.summary, 'Added meta')
+    })
+
+    it('should not remove override route from results when no matching default exists', async () => {
+      const dir = path.join(tmpDir, 'override-no-match')
+      await mkdir(dir, { recursive: true })
+      await writeJson(path.join(dir, 'routes.json'), {
+        root: 'test',
+        routes: [{
+          route: '/nomatch',
+          override: true,
+          handlers: { get: 'myHandler' },
+          meta: { get: { summary: 'Orphan' } }
+        }]
+      })
+      const defaultsPath = path.join(tmpDir, 'override-no-match-defaults.json')
+      await writeJson(defaultsPath, {
+        routes: [{ route: '/', handlers: { post: 'myHandler' } }]
+      })
+      const config = await loadRouteConfig(dir, { myHandler: () => {} }, { defaults: defaultsPath })
+      assert.equal(config.routes.length, 2)
+      assert.equal(config.routes[0].route, '/')
+      assert.equal(config.routes[1].route, '/nomatch')
+    })
+
+    it('should strip the override flag from merged route', async () => {
+      const dir = path.join(tmpDir, 'override-strip-flag')
+      await mkdir(dir, { recursive: true })
+      await writeJson(path.join(dir, 'routes.json'), {
+        root: 'test',
+        routes: [{
+          route: '/',
+          override: true,
+          handlers: { post: 'myHandler' },
+          meta: { post: { summary: 'Test' } }
+        }]
+      })
+      const defaultsPath = path.join(tmpDir, 'override-strip-defaults.json')
+      await writeJson(defaultsPath, {
+        routes: [{ route: '/', handlers: { post: 'myHandler' } }]
+      })
+      const config = await loadRouteConfig(dir, { myHandler: () => {} }, { defaults: defaultsPath })
+      assert.equal(config.routes[0].override, undefined)
+    })
   })
 })
