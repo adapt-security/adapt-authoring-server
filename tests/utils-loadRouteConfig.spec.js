@@ -164,7 +164,9 @@ describe('loadRouteConfig()', () => {
   })
 
   it('should validate route items via consumer schema using $merge', async () => {
-    // Consumer schema extends routes and adds items constraint — mirrors real apiroutes/authroutes
+    // Note: real consumer schemas use items.$ref: 'routeitem' which is resolved by the
+    // jsonschema module at startup. In tests we inline the items constraint because AJV
+    // throws anchor conflicts when $ref targets an already-registered schema.
     const schemaFile = await writeJson(path.join(tmpDir, 'strict-routes.schema.json'), {
       $schema: 'https://json-schema.org/draft/2020-12/schema',
       $anchor: 'strict-routes',
@@ -231,7 +233,10 @@ describe('loadRouteConfig()', () => {
   })
 
   describe('permissions field in route items', () => {
-    // Consumer schema with items validation including the permissions field from routeitem
+    // Note: real consumer schemas use items.$ref: 'routeitem' which includes the permissions
+    // property. In tests we inline the constraint because AJV throws anchor conflicts when
+    // $ref targets an already-registered schema. The permissions definition here mirrors
+    // routeitem.schema.json to ensure the same validation behaviour.
     const permSchema = {
       $schema: 'https://json-schema.org/draft/2020-12/schema',
       $anchor: 'perm-routes',
