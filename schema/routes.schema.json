@@ -12,5 +12,5 @@
       "description": "Route definitions"
     }
   },
-  "required": ["root"]
+  "required": []
 }
