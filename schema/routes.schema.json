@@ -9,8 +9,50 @@
     },
     "routes": {
       "type": "array",
-      "description": "Route definitions"
+      "description": "Route definitions",
+      "items": {
+        "type": "object",
+        "properties": {
+          "route": {
+            "type": "string",
+            "description": "Express-style route path"
+          },
+          "handlers": {
+            "type": "object",
+            "description": "Keys are HTTP methods, values are handler name strings",
+            "propertyNames": { "enum": ["get", "post", "put", "patch", "delete"] },
+            "additionalProperties": { "type": "string" }
+          },
+          "internal": {
+            "type": "boolean",
+            "description": "Restrict route to localhost",
+            "default": false
+          },
+          "permissions": {
+            "type": "object",
+            "description": "Keys are HTTP methods, values are permission scope arrays or null for unsecured",
+            "propertyNames": { "enum": ["get", "post", "put", "patch", "delete"] },
+            "additionalProperties": {
+              "oneOf": [
+                { "type": "array", "items": { "type": "string" } },
+                { "type": "null" }
+              ]
+            }
+          },
+          "meta": {
+            "type": "object",
+            "description": "Keys are HTTP methods, values are OpenAPI operation objects",
+            "propertyNames": { "enum": ["get", "post", "put", "patch", "delete"] }
+          },
+          "override": {
+            "type": "boolean",
+            "description": "When true and a defaults template is in use, merges this route's properties onto the matching default route (by path) instead of adding a duplicate",
+            "default": false
+          }
+        },
+        "required": ["route", "handlers"]
+      }
     }
   },
-  "required": ["root"]
+  "required": []
 }
