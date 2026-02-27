@@ -1,6 +1,6 @@
 {
   "name": "adapt-authoring-server",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Provides an Express application routing and more",
   "homepage": "https://github.com/adapt-security/adapt-authoring-server",
   "license": "GPL-3.0",
