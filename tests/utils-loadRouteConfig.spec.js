@@ -118,14 +118,13 @@ describe('loadRouteConfig()', () => {
     )
   })
 
-  it('should throw when routes.json fails schema validation (missing required root)', async () => {
+  it('should accept routes.json without root property', async () => {
     const dir = path.join(tmpDir, 'no-root')
     await mkdir(dir, { recursive: true })
     await writeJson(path.join(dir, 'routes.json'), { routes: [] })
-    await assert.rejects(
-      () => loadRouteConfig(dir, {}),
-      /Invalid routes\.json.*must have required property 'root'/s
-    )
+    const config = await loadRouteConfig(dir, {})
+    assert.ok(config !== null)
+    assert.equal(config.root, undefined)
   })
 
   it('should throw when routes.json fails schema validation (wrong type for root)', async () => {
