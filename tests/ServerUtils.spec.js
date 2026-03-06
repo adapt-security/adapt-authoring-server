@@ -17,6 +17,18 @@ describe('ServerUtils', () => {
   })
 
   describe('#addErrorHandler()', () => {
+    /** Set up a res with addErrorHandler + status/json capture */
+    function createSendErrorSetup (reqOverrides = {}) {
+      const req = { translate: (error) => error.message, ...reqOverrides }
+      const res = {}
+      ServerUtils.addErrorHandler(req, res, () => {})
+      let statusCode
+      let jsonData
+      res.status = (code) => { statusCode = code; return res }
+      res.json = (data) => { jsonData = data }
+      return { req, res, getStatus: () => statusCode, getJson: () => jsonData }
+    }
+
     it('should add sendError method to response object', () => {
       const req = {}
       const res = {}
@@ -30,28 +42,18 @@ describe('ServerUtils', () => {
     })
 
     it('sendError should send AdaptError as JSON with status code', () => {
-      const req = { translate: (error) => error.message }
-      const res = {}
-      const next = () => {}
+      const { res, getStatus, getJson } = createSendErrorSetup()
 
-      ServerUtils.addErrorHandler(req, res, next)
-
-      let statusCode
-      let jsonData
-      res.status = (code) => { statusCode = code; return res }
-      res.json = (data) => { jsonData = data }
-
-      const adaptError = {
+      res.sendError({
         constructor: { name: 'AdaptError' },
         statusCode: 404,
         code: 'NOT_FOUND',
         message: 'Not found'
-      }
-      res.sendError(adaptError)
+      })
 
-      assert.equal(statusCode, 404)
-      assert.equal(jsonData.code, 'NOT_FOUND')
-      assert.equal(jsonData.message, 'Not found')
+      assert.equal(getStatus(), 404)
+      assert.equal(getJson().code, 'NOT_FOUND')
+      assert.equal(getJson().message, 'Not found')
     })
 
     it('sendError should fall back to SERVER_ERROR for unknown errors', () => {
@@ -63,21 +65,12 @@ describe('ServerUtils', () => {
         message: 'Internal server error'
       }
 
-      const req = { translate: (error) => error.message }
-      const res = {}
-      const next = () => {}
-
-      ServerUtils.addErrorHandler(req, res, next)
-
-      let statusCode
-      let jsonData
-      res.status = (code) => { statusCode = code; return res }
-      res.json = (data) => { jsonData = data }
+      const { res, getStatus, getJson } = createSendErrorSetup()
 
       res.sendError(new Error('something broke'))
 
-      assert.equal(statusCode, 500)
-      assert.equal(jsonData.code, 'SERVER_ERROR')
+      assert.equal(getStatus(), 500)
+      assert.equal(getJson().code, 'SERVER_ERROR')
     })
 
     it('sendError should look up known error codes on non-AdaptError', () => {
@@ -88,68 +81,41 @@ describe('ServerUtils', () => {
         message: 'Custom error'
       }
 
-      const req = { translate: (error) => error.message }
-      const res = {}
-      const next = () => {}
-
-      ServerUtils.addErrorHandler(req, res, next)
-
-      let statusCode
-      let jsonData
-      res.status = (code) => { statusCode = code; return res }
-      res.json = (data) => { jsonData = data }
+      const { res, getStatus, getJson } = createSendErrorSetup()
 
       const error = new Error('details')
       error.code = 'CUSTOM_CODE'
       res.sendError(error)
 
-      assert.equal(statusCode, 422)
-      assert.equal(jsonData.code, 'CUSTOM_CODE')
+      assert.equal(getStatus(), 422)
+      assert.equal(getJson().code, 'CUSTOM_CODE')
     })
 
     it('sendError should include data field in response', () => {
-      const req = { translate: (error) => error.message }
-      const res = {}
-      const next = () => {}
+      const { res, getJson } = createSendErrorSetup()
 
-      ServerUtils.addErrorHandler(req, res, next)
-
-      let jsonData
-      res.status = () => res
-      res.json = (data) => { jsonData = data }
-
-      const adaptError = {
+      res.sendError({
         constructor: { name: 'AdaptError' },
         statusCode: 400,
         code: 'BAD_REQUEST',
         message: 'Bad request',
         data: { field: 'email' }
-      }
-      res.sendError(adaptError)
+      })
 
-      assert.deepEqual(jsonData.data, { field: 'email' })
+      assert.deepEqual(getJson().data, { field: 'email' })
     })
 
     it('sendError should use error.message when req.translate is not available', () => {
-      const req = {}
-      const res = {}
-      const next = () => {}
+      const { res, getJson } = createSendErrorSetup({ translate: undefined })
 
-      ServerUtils.addErrorHandler(req, res, next)
-
-      let jsonData
-      res.status = () => res
-      res.json = (data) => { jsonData = data }
-
-      const adaptError = {
+      res.sendError({
         constructor: { name: 'AdaptError' },
         statusCode: 500,
         code: 'ERR',
         message: 'fallback message'
-      }
-      res.sendError(adaptError)
+      })
 
-      assert.equal(jsonData.message, 'fallback message')
+      assert.equal(getJson().message, 'fallback message')
     })
   })
 
