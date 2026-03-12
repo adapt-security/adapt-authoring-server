@@ -91,6 +91,25 @@ describe('ServerUtils', () => {
       assert.equal(getJson().code, 'CUSTOM_CODE')
     })
 
+    it('sendError should copy data from non-AdaptError to looked-up error', () => {
+      App.instance.errors = App.instance.errors || {}
+      App.instance.errors.VALIDATION_FAILED = {
+        statusCode: 400,
+        code: 'VALIDATION_FAILED',
+        message: 'Validation failed',
+        setData (data) { this.data = data; return this }
+      }
+
+      const { res, getJson } = createSendErrorSetup()
+
+      const error = new Error('Validation failed')
+      error.code = 'VALIDATION_FAILED'
+      error.data = { errors: '/title is required', schemaName: 'config' }
+      res.sendError(error)
+
+      assert.deepEqual(getJson().data, { errors: '/title is required', schemaName: 'config' })
+    })
+
     it('sendError should include data field in response', () => {
       const { res, getJson } = createSendErrorSetup()
 
