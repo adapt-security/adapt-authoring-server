@@ -1,6 +1,6 @@
 {
   "name": "adapt-authoring-server",
-  "version": "2.2.4",
+  "version": "2.2.3",
   "description": "Provides an Express application routing and more",
   "homepage": "https://github.com/adapt-security/adapt-authoring-server",
   "license": "GPL-3.0",
@@ -17,37 +17,11 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@semantic-release/git": "^10.0.1",
+    "@adaptlearning/semantic-release-config": "^1.0.0",
     "adapt-schemas": "^1.1.0",
-    "conventional-changelog-eslint": "^6.0.0",
-    "semantic-release": "^25.0.2",
     "standard": "^17.1.0"
   },
   "release": {
-    "plugins": [
-      [
-        "@semantic-release/commit-analyzer",
-        {
-          "preset": "eslint"
-        }
-      ],
-      [
-        "@semantic-release/release-notes-generator",
-        {
-          "preset": "eslint"
-        }
-      ],
-      "@semantic-release/npm",
-      "@semantic-release/github",
-      [
-        "@semantic-release/git",
-        {
-          "assets": [
-            "package.json"
-          ],
-          "message": "Chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
-        }
-      ]
-    ]
+    "extends": "@adaptlearning/semantic-release-config"
   }
 }
