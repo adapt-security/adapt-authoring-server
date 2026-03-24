@@ -301,7 +301,7 @@ describe('loadRouteConfig()', () => {
   })
 
   describe('defaults option', () => {
-    it('should prepend default routes from template when defaults path is provided', async () => {
+    it('should place custom routes before default routes for correct Express matching', async () => {
       const dir = path.join(tmpDir, 'with-defaults')
       await mkdir(dir, { recursive: true })
       await writeJson(path.join(dir, 'routes.json'), {
@@ -318,8 +318,8 @@ describe('loadRouteConfig()', () => {
       }
       const config = await loadRouteConfig(dir, target, { defaults: defaultsPath })
       assert.equal(config.routes.length, 2)
-      assert.equal(config.routes[0].route, '/')
-      assert.equal(config.routes[1].route, '/custom')
+      assert.equal(config.routes[0].route, '/custom')
+      assert.equal(config.routes[1].route, '/')
     })
 
     it('should resolve handler strings in default routes using handlerAliases', async () => {
@@ -450,8 +450,8 @@ describe('loadRouteConfig()', () => {
       })
       const config = await loadRouteConfig(dir, { myHandler: () => {} }, { defaults: defaultsPath })
       assert.equal(config.routes.length, 2)
-      assert.equal(config.routes[0].route, '/')
-      assert.equal(config.routes[1].route, '/nomatch')
+      assert.equal(config.routes[0].route, '/nomatch')
+      assert.equal(config.routes[1].route, '/')
     })
 
     it('should strip the override flag from merged route', async () => {
