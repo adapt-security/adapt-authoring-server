@@ -18,7 +18,7 @@
   },
   "devDependencies": {
     "@adaptlearning/semantic-release-config": "^1.0.0",
-    "adapt-schemas": "^1.1.0",
+    "adapt-schemas": "^3.1.0",
     "standard": "^17.1.0"
   },
   "release": {
