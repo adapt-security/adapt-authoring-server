@@ -34,9 +34,9 @@ describe('loadRouteConfig()', () => {
     // Build shared schema registry with the server's base schemas, mirroring how
     // adapt-authoring-jsonschema auto-discovers schema/ files from all dependencies at startup
     schemas = new Schemas()
-    await schemas.init()
-    await schemas.registerSchema(path.join(SCHEMA_DIR, 'routes.schema.json'))
-    await schemas.registerSchema(path.join(SCHEMA_DIR, 'routeitem.schema.json'))
+    schemas.init()
+    schemas.registerSchema(path.join(SCHEMA_DIR, 'routes.schema.json'))
+    schemas.registerSchema(path.join(SCHEMA_DIR, 'routeitem.schema.json'))
 
     // Mock App.instance.waitForModule so loadRouteConfig can resolve 'jsonschema'
     // without a running app instance
@@ -150,7 +150,7 @@ describe('loadRouteConfig()', () => {
         }
       }
     })
-    await schemas.registerSchema(schemaFile)
+    schemas.registerSchema(schemaFile)
     try {
       const dir = path.join(tmpDir, 'consumer-fields')
       await mkdir(dir, { recursive: true })
@@ -188,7 +188,7 @@ describe('loadRouteConfig()', () => {
         }
       }
     })
-    await schemas.registerSchema(schemaFile)
+    schemas.registerSchema(schemaFile)
     try {
       const dir = path.join(tmpDir, 'missing-route-field')
       await mkdir(dir, { recursive: true })
@@ -217,7 +217,7 @@ describe('loadRouteConfig()', () => {
         }
       }
     })
-    await schemas.registerSchema(schemaFile)
+    schemas.registerSchema(schemaFile)
     try {
       const dir = path.join(tmpDir, 'missing-schemaname')
       await mkdir(dir, { recursive: true })
@@ -270,7 +270,7 @@ describe('loadRouteConfig()', () => {
     }
 
     before(async () => {
-      await schemas.registerSchema(await writeJson(path.join(tmpDir, 'perm-routes.schema.json'), permSchema))
+      schemas.registerSchema(await writeJson(path.join(tmpDir, 'perm-routes.schema.json'), permSchema))
     })
 
     after(() => schemas.deregisterSchema('perm-routes'))
