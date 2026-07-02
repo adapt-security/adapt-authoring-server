@@ -1,4 +1,4 @@
-import { describe, it, before } from 'node:test'
+import { describe, it, before, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
 import { App } from 'adapt-authoring-core'
 
@@ -14,6 +14,11 @@ describe('ServerUtils', () => {
     process.exitCode = 0
 
     ServerUtils = (await import('../lib/ServerUtils.js')).default
+  })
+
+  beforeEach(() => {
+    // real errors expose registered codes as non-configurable getters, so stub with a plain object
+    App.instance.errors = {}
   })
 
   describe('#addErrorHandler()', () => {
@@ -57,7 +62,6 @@ describe('ServerUtils', () => {
     })
 
     it('sendError should fall back to SERVER_ERROR for unknown errors', () => {
-      App.instance.errors = App.instance.errors || {}
       App.instance.errors.SERVER_ERROR = {
         constructor: { name: 'AdaptError' },
         statusCode: 500,
@@ -74,7 +78,6 @@ describe('ServerUtils', () => {
     })
 
     it('sendError should look up known error codes on non-AdaptError', () => {
-      App.instance.errors = App.instance.errors || {}
       App.instance.errors.CUSTOM_CODE = {
         statusCode: 422,
         code: 'CUSTOM_CODE',
@@ -92,7 +95,6 @@ describe('ServerUtils', () => {
     })
 
     it('sendError should copy data from non-AdaptError to looked-up error', () => {
-      App.instance.errors = App.instance.errors || {}
       App.instance.errors.VALIDATION_FAILED = {
         statusCode: 400,
         code: 'VALIDATION_FAILED',
@@ -190,7 +192,6 @@ describe('ServerUtils', () => {
 
     it('should call next with METHOD_NOT_ALLOWED when path exists but method does not match', () => {
       const mockError = { code: 'METHOD_NOT_ALLOWED' }
-      App.instance.errors = App.instance.errors || {}
       App.instance.errors.METHOD_NOT_ALLOWED = { setData: () => mockError }
 
       const mockRouter = {
@@ -215,7 +216,6 @@ describe('ServerUtils', () => {
 
   describe('#rootNotFoundHandler()', () => {
     it('should respond with NOT_FOUND status code', () => {
-      App.instance.errors = App.instance.errors || {}
       App.instance.errors.NOT_FOUND = { statusCode: 404 }
 
       let statusCode
@@ -235,7 +235,6 @@ describe('ServerUtils', () => {
   describe('#apiNotFoundHandler()', () => {
     it('should call next with ENDPOINT_NOT_FOUND error', () => {
       const mockError = { code: 'ENDPOINT_NOT_FOUND' }
-      App.instance.errors = App.instance.errors || {}
       App.instance.errors.ENDPOINT_NOT_FOUND = { setData: () => mockError }
 
       let nextArg
