@@ -42,7 +42,6 @@ describe('generateRouterMap()', () => {
   it('should include endpoint URLs and accepted methods', () => {
     const mockRouter = {
       root: 'api',
-      route: '/api',
       path: '/api',
       url: 'http://localhost:5000/api',
       routes: [
@@ -59,6 +58,7 @@ describe('generateRouterMap()', () => {
     const keys = Object.keys(map)
 
     assert.ok(keys.length > 0)
+    assert.equal(keys[0], 'general_endpoints')
     const endpoints = map[keys[0]]
     assert.ok(Array.isArray(endpoints))
     assert.equal(endpoints[0].url, 'http://localhost:5000/api/users')
@@ -81,7 +81,6 @@ describe('generateRouterMap()', () => {
     }
     const mockRouter = {
       root: 'api',
-      route: '/api',
       path: '/api',
       url: 'http://localhost:5000/api',
       routes: [],
@@ -117,7 +116,6 @@ describe('generateRouterMap()', () => {
     }
     const mockRouter = {
       root: 'api',
-      route: '/api',
       path: '/api',
       url: 'http://localhost:5000/api',
       routes: [],
