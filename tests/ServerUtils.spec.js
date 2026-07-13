@@ -247,4 +247,18 @@ describe('ServerUtils', () => {
       assert.equal(nextArg.code, 'ENDPOINT_NOT_FOUND')
     })
   })
+
+  describe('#setDefaultCacheControl()', () => {
+    it('should mark the response private + no-cache and call next', () => {
+      let headerName, headerValue
+      let nextCalled = false
+      const res = { set: (name, value) => { headerName = name; headerValue = value } }
+
+      ServerUtils.setDefaultCacheControl({}, res, () => { nextCalled = true })
+
+      assert.equal(headerName, 'Cache-Control')
+      assert.equal(headerValue, 'private, no-cache')
+      assert.equal(nextCalled, true)
+    })
+  })
 })

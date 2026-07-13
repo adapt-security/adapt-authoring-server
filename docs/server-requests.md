@@ -70,6 +70,19 @@ This may go without saying, but please stick to standardised HTTP response codes
 
 See the [Mozilla Developer Network docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) for a full list of HTTP response status codes and what they mean.
 
+## Response caching
+
+Every `/api` response is sent with `Cache-Control: private, no-cache` by default. API responses vary by the caller's authentication, but a shared cache (a CDN or proxy) keys on the URL and ignores the session cookie — so without this a shared cache could store one user's response and serve it to another. `private` keeps shared caches out while still allowing the caller's own browser cache and ETag revalidation; `no-cache` makes the browser revalidate rather than serve a stale copy.
+
+If an endpoint is genuinely public and user-agnostic (e.g. a static reference resource), a handler may override this by setting its own `Cache-Control` before responding:
+
+```js
+async myPublicHandler (req, res) {
+  res.set('Cache-Control', 'public, max-age=3600')
+  res.json(data)
+}
+```
+
 ## Use the built-in error handler
 The Server module adds a `sendError` utility function to the ServerResponse object that's passed to every route handler in the stack. Making use of this in your own code will ensure errors are formatted in a consistent way.
 
